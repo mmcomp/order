@@ -27,7 +27,7 @@ class ProductController extends AbstractController
     }
 
     /**
-     * @Route("/product/add")
+     * @Route("/product/add", name="addproduct")
     */
     public function new(Request $request): Response
     {
