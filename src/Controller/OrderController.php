@@ -7,48 +7,57 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
+use App\Entity\Order;
+use App\Entity\OrderItem;
+use App\Form\OrderType;
+use App\Form\OrderItemType;
 
 class OrderController extends AbstractController
 {
     /**
-     * @Route("/order", methods={"GET"})
-    */
-    public function getOrder(): Response
+     * @Route("/order_item", name="orderItems")
+     */
+    public function index(): Response
     {
-        $session = new Session();
-        $session->start();
-        $orders = $session->get('orders');
-        if($orders===null) {
-            $orders = [];
-            $session->set('orders', '[]');
-        }else {
-            $orders = json_decode($orders, true);
-        }
-        // var_dump($orders);
-        $form = $this->createFormBuilder($task)
-            ->add('task', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Create Task'])
-            ->getForm();
-        return $this->render('order/index.html.twig');
+        $orderItems = $this->getDoctrine()
+            ->getRepository(OrderItem::class)
+            ->findAll();
+
+        return $this->render('order/index.html.twig', [
+            'controller_name' => 'OrderController',
+            'orderItems' => $orderItems
+        ]);
     }
 
     /**
-     * @Route("/order", methods={"POST"})
+     * @Route("/order_item/add", name="addOrderItem")
     */
-    public function addOrder(): Response
+    public function new(Request $request): Response
     {
-        $request = Request::createFromGlobals();
-        $products_id = $request->request->post("products_id");
-        // $session = new Session();
-        // $session->start();
-        // $orders = $session->get('orders');
-        // if($orders===null) {
-        //     $orders = [];
-        //     $session->set('orders', '[]');
-        // }else {
-        //     $orders = json_decode($orders, true);
-        // }
-        // // var_dump($orders);
-        // return $this->render('order/index.html.twig');
+        $orderItem = new OrderItem();
+
+        $form = $this->createForm(OrderItemType::class, $orderItem);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $orderItem = $form->getData();
+
+            // $imagePath = $form['image_path']->getData();
+            // $extension = $imagePath->guessExtension();
+            // $webPath = $this->getParameter('kernel.project_dir') . '/public/img/';
+            // $fileName = time() . '.' . $extension;
+            // $imagePath->move($webPath, $fileName);
+            // $product->setImagePath('/img/' . $fileName);
+
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($orderItem);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('orderItems');
+        }
+
+        return $this->render('order/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 }

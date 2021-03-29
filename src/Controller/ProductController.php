@@ -57,4 +57,26 @@ class ProductController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+
+    /**
+     * @Route("/product/search", name="searchproduct")
+    */
+    public function searchProduct(Request $request): Response
+    {
+        $q = $request->query->get('term'); // use "term" instead of "q" for jquery-ui
+        $results = $this->getDoctrine()->getRepository(Product::class)->findAll();
+
+        return $this->render('order/product.json.twig', ['results' => $results]);
+    }
+
+    /**
+     * @Route("/product/get", name="getproduct")
+    */
+    public function getProduct(Request $request): Response
+    {
+        $id = $request->query->get('id');
+        $product = $this->getDoctrine()->getRepository(Product::class)->find($id);
+
+        return $this->json($product->getName());
+    }
 }

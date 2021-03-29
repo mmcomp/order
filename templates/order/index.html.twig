@@ -1,16 +1,21 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Order</title>
-    </head>
-    <body>
-        <h1>
-            This is the Order :
-        </h1>
-        <form method="post">
-            <input type="text" name="products_id" />
-            <button>Save</button>
-        </form> 
-    </body>
-</html>
+{% extends 'base.html.twig' %}
+
+{% block title %}Order{% endblock %}
+
+{% block body %}
+
+<div>
+    <h1>Order</h1>
+    <a href="{{ path('addOrderItem') }}">Add to basket</a>
+    <ul>
+        {% for orderItem in orderItems %}
+            <li>
+            {{ orderItem.product.name|e }}
+            {% if orderItem.product.getImagePath() %}
+            <img src="{{ orderItem.product.getImagePath() }}" style="height: 20px;" />
+            {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
